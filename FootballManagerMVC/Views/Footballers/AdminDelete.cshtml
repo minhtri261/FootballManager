@@ -1,0 +1,21 @@
+﻿@model FootballManagerMVC.Models.Footballer
+@{
+    ViewData["Title"] = "Xóa cầu thủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Xóa cầu thủ</h2>
+<p>Bạn có chắc chắn muốn xóa <strong>@Model.Name</strong> không?</p>
+
+<table class="table table-bordered">
+    <tr><th>Tuổi</th><td>@Model.Age</td></tr>
+    <tr><th>Quốc tịch</th><td>@Model.Nation</td></tr>
+    <tr><th>Vị trí</th><td>@Model.Position</td></tr>
+    <tr><th>CLB</th><td>@(Model.ClubId == null ? "Thất nghiệp" : Model.ClubId.ToString())</td></tr>
+</table>
+
+<form asp-action="AdminDelete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

@@ -1,0 +1,143 @@
+﻿@model FootballManagerMVC.Models.Tournament
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Thêm giải đấu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    // Serialize RewardByRank để truyền ra JS (nếu có)
+    var rewardJson = Model?.RewardByRank != null
+        ? JsonSerializer.Serialize(Model.RewardByRank)
+        : "[]";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="AdminCreate" method="post" id="tournamentForm">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Tên giải đấu</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="SeasonNumber" class="form-label">Mùa giải</label>
+        <input asp-for="SeasonNumber" type="number" class="form-control" />
+        <span asp-validation-for="SeasonNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TeamsCount" class="form-label">Số đội tham gia</label>
+        <input asp-for="TeamsCount" type="number" class="form-control" />
+        <span asp-validation-for="TeamsCount" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Type" class="form-label">Thể thức</label>
+        <select asp-for="Type" class="form-select">
+            <option value="League">League</option>
+            <option value="Cup">Cup</option>
+            <option value="C1">GroupStage</option>
+        </select>
+        <span asp-validation-for="Type" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PlayersPerMatch" class="form-label">Số cầu thủ mỗi trận</label>
+        <input asp-for="PlayersPerMatch" type="number" class="form-control" />
+        <span asp-validation-for="PlayersPerMatch" class="text-danger"></span>
+    </div>
+
+    <!-- RewardByRank dynamic table -->
+    <div class="mb-3">
+        <label class="form-label">Thưởng theo thứ hạng</label>
+        <table class="table table-sm table-bordered" id="rewardTable">
+            <thead>
+                <tr>
+                    <th style="width:120px">Hạng</th>
+                    <th>Số tiền</th>
+                    <th style="width:120px">Hành động</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <input type="hidden" name="RewardByRank" id="RewardByRank" value='@Html.Raw(rewardJson)' />
+
+        <button type="button" class="btn btn-outline-primary btn-sm" id="addRewardBtn">Thêm hàng</button>
+        <small class="form-text text-muted">Ví dụ: [{"rank":1,"money":2000},{"rank":2,"money":1500}]</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Tạo mới</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>
+
+@section Scripts {
+    <script>
+        (function () {
+            const tableBody = document.querySelector("#rewardTable tbody");
+            const addBtn = document.getElementById("addRewardBtn");
+            const hiddenInput = document.getElementById("RewardByRank");
+            const form = document.getElementById("tournamentForm");
+
+            let rewards = [];
+            try {
+                const raw = hiddenInput.value && hiddenInput.value.trim() ? hiddenInput.value : "[]";
+                rewards = JSON.parse(raw);
+                if (!Array.isArray(rewards)) rewards = [];
+            } catch {
+                rewards = [];
+            }
+
+            function render() {
+                tableBody.innerHTML = "";
+                if (rewards.length === 0) {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td colspan="3" class="text-center text-muted">Chưa có thưởng nào</td>`;
+                    tableBody.appendChild(tr);
+                    return;
+                }
+
+                rewards.forEach((r, idx) => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td><input name="rank" type="number" min="1" class="form-control form-control-sm" value="${r.rank ?? ""}" /></td>
+                        <td><input name="money" type="number" min="0" class="form-control form-control-sm" value="${r.money ?? ""}" /></td>
+                        <td><button type="button" class="btn btn-sm btn-danger remove-row">Xóa</button></td>`;
+                    tableBody.appendChild(tr);
+                });
+            }
+
+            function collectFromTable() {
+                const rows = Array.from(tableBody.querySelectorAll("tr"));
+                const collected = [];
+                for (const row of rows) {
+                    const rank = parseInt(row.querySelector('input[name="rank"]')?.value || "0");
+                    const money = parseInt(row.querySelector('input[name="money"]')?.value || "0");
+                    if (rank > 0) collected.push({ rank, money });
+                }
+                return collected;
+            }
+
+            addBtn.addEventListener("click", () => {
+                rewards.push({ rank: "", money: "" });
+                render();
+            });
+
+            tableBody.addEventListener("click", e => {
+                if (e.target.classList.contains("remove-row")) {
+                    const row = e.target.closest("tr");
+                    const idx = Array.from(tableBody.children).indexOf(row);
+                    if (idx >= 0) rewards.splice(idx, 1);
+                    render();
+                }
+            });
+
+            form.addEventListener("submit", () => {
+                const collected = collectFromTable();
+                hiddenInput.value = JSON.stringify(collected);
+            });
+
+            render();
+        })();
+    </script>
+}

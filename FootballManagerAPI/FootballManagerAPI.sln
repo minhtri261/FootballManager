@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballManager.Data", "..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballManager.Business", "..\FootballManager.Business\FootballManager.Business.csproj", "{2FE20854-2BD1-4FBA-B80A-C4B40855AEC3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FootballManagerMVC", "..\FootballManagerMVC\FootballManagerMVC.csproj", "{1561FFB6-AA37-446A-B2FB-7AB179D7D430}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2FE20854-2BD1-4FBA-B80A-C4B40855AEC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FE20854-2BD1-4FBA-B80A-C4B40855AEC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FE20854-2BD1-4FBA-B80A-C4B40855AEC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1561FFB6-AA37-446A-B2FB-7AB179D7D430}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1561FFB6-AA37-446A-B2FB-7AB179D7D430}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1561FFB6-AA37-446A-B2FB-7AB179D7D430}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1561FFB6-AA37-446A-B2FB-7AB179D7D430}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

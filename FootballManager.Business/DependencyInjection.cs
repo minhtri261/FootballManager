@@ -14,6 +14,18 @@ namespace FootballManager.Business
             services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
 
             // ✅ Cụ thể từng entity ở dưới này
+            // Repos
+            services.AddScoped<IFootballerRepository, FootballerRepository>();
+            services.AddScoped<IClubRepository, ClubRepository>();
+            services.AddScoped<ITournamentRepository, TournamentRepository>();
+            services.AddScoped<IMatchRepository, MatchRepository>();
+
+            // Services
+            services.AddScoped<IFootballerService, FootballerService>();
+            services.AddScoped<IClubService, ClubService>();
+            services.AddScoped<ITournamentService, TournamentService>();
+            services.AddScoped<TournamentClubService>();
+            services.AddScoped<TournamentMatchService>();
 
             return services;
         }

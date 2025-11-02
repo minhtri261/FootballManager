@@ -1,0 +1,43 @@
+﻿@model IEnumerable<FootballManagerMVC.Models.Tournament>
+@{
+    ViewData["Title"] = "Danh sách giải đấu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>
+    <a asp-action="AdminCreate" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Thêm giải đấu
+    </a>
+</p>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Tên</th>
+            <th>Mùa giải</th>
+            <th>Số đội</th>
+            <th>Thể thức</th>
+            <th>Cầu thủ/trận</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var t in Model)
+        {
+            <tr>
+                <td>@t.Name</td>
+                <td>@t.SeasonNumber</td>
+                <td>@t.TeamsCount</td>
+                <td>@t.Type</td>
+                <td>@t.PlayersPerMatch</td>
+                <td>
+                    <a asp-action="TournamentDetails" asp-route-id="@t.Id">Chi tiết</a> |
+                    <a asp-action="AdminEdit" asp-route-id="@t.Id">Sửa</a> |
+                    <a asp-action="AdminDelete" asp-route-id="@t.Id">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

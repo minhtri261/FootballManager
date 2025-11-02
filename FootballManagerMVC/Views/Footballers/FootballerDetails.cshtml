@@ -1,0 +1,23 @@
+﻿@model FootballManagerMVC.Models.Footballer
+@{
+    ViewData["Title"] = "Chi tiết cầu thủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@Model.Name</h2>
+
+<table class="table table-bordered">
+    <tr><th>Tuổi</th><td>@Model.Age</td></tr>
+    <tr><th>Quốc tịch</th><td>@Model.Nation</td></tr>
+    <tr><th>Vị trí</th><td>@Model.Position</td></tr>
+    <tr><th>CLB</th><td>@(Model.ClubName != null ? Model.ClubName : "Thất nghiệp")</td></tr>
+    <tr><th>Chất lượng</th><td>@Model.Quality</td></tr>
+    <tr><th>Hợp đồng</th><td>@Model.ContractYears năm</td></tr>
+    <tr><th>Trạng thái</th><td>@Model.Status</td></tr>
+    <tr><th>Đang trên TTCN miễn phí</th><td>@(Model.IsTransferListed ? "✅" : "❌")</td></tr>
+</table>
+
+<a asp-action="AdminEdit" asp-route-id="@Model.Id" class="btn btn-warning">Sửa</a>
+<a asp-action="AdminDelete" asp-route-id="@Model.Id" class="btn btn-danger">Xóa</a>
+<a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+

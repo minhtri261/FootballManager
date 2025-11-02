@@ -11,7 +11,14 @@ namespace FootballManagerAPI
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+            .AddJsonOptions(opt =>
+            {
+                opt.JsonSerializerOptions.ReferenceHandler =
+                    System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                opt.JsonSerializerOptions.WriteIndented = true;
+            });
+
 
             // Swagger/OpenAPI
             builder.Services.AddEndpointsApiExplorer();
@@ -23,8 +30,20 @@ namespace FootballManagerAPI
 
             // ✅ Add DI (từ Business layer)
             builder.Services.AddBusinessServices();
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy
+                        .WithOrigins( "http://localhost:7057") 
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
             var app = builder.Build();
+            
+            app.UseCors("AllowAll");
 
             // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
