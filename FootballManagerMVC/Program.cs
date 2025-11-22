@@ -12,7 +12,7 @@ namespace FootballManagerMVC
             builder.Services.AddControllersWithViews();
             builder.Services.AddHttpClient<ApiClient>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7088/api/admin/");
+                client.BaseAddress = new Uri("https://localhost:7088/api/");
             });
             var app = builder.Build();
 

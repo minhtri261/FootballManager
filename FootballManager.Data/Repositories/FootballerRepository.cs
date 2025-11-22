@@ -30,5 +30,4 @@ namespace FootballManager.Data.Repositories
                 .ToListAsync();
         }
     }
-
 }

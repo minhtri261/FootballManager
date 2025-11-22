@@ -17,7 +17,7 @@ namespace FootballManager.Data.Entities
         public int? ClubId { get; set; }
         public Club? Club { get; set; }
         public int ContractYears { get; set; }
-        public string Status { get; set; } = "Chuyên nghiệp"; // "Trẻ", "Chuyên nghiệp", "Giải nghệ"
+        public string Status { get; set; } = "Trẻ"; // "Trẻ", "Trỗi dậy", "Đỉnh cao" , "Ổn định" , "Lão tướng", "Giải nghệ"
         public int AwardQBV { get; set; }
         public int AwardQBB { get; set; }
         public int AwardQBD { get; set; }

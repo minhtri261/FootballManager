@@ -1,0 +1,77 @@
+﻿@model List<FootballManagerMVC.Models.FootballerDto>
+@{
+    ViewData["Title"] = "Transfer Market";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4 text-info fw-bold">💰 Thị trường chuyển nhượng</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Tên</th>
+                <th>Vị trí</th>
+                <th>Tuổi</th>
+                <th>Chỉ số</th>
+                <th>Hợp đồng</th>
+                <th>CLB hiện tại</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in Model)
+            {
+                <tr>
+                    <td>@f.Name</td>
+                    <td>@f.Position</td>
+                    <td>@f.Age</td>
+                    <td>@f.Quality</td>
+                    <td>@f.ContractYears năm</td>
+                    <td>@(f.ClubName ?? "Free Agent")</td>
+                    <td>
+                        @if (f.ClubName == null)
+                        {
+                            <!-- Cầu thủ tự do -->
+                            <form asp-action="FreeAgentOffer" method="post" class="d-inline">
+                                <input type="hidden" name="FootballerId" value="@f.Id" />
+                                <input type="hidden" name="FromClubId" value="@ViewBag.MyClubId" />
+                                <input type="hidden" name="ContractYears" value="2" />
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-send"></i> Gửi lời chiêu mộ
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <!-- Cầu thủ thuộc CLB khác -->
+                            <form asp-action="TransferOffer" method="post" class="d-inline">
+                                <input type="hidden" name="FootballerId" value="@f.Id" />
+                                <input type="hidden" name="FromClubId" value="@ViewBag.MyClubId" />
+                                <select name="ContractYears" class="form-select form-select-sm" style="width: 80px;">
+                                    <option value="1">1 năm</option>
+                                    <option value="2">2 năm</option>
+                                    <option value="3" selected>3 năm</option>
+                                    <option value="4">4 năm</option>
+                                    <option value="5">5 năm</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-currency-dollar"></i> Gửi đề nghị chiêu mộ
+                                </button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

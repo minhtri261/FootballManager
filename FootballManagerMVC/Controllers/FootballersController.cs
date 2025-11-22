@@ -17,11 +17,11 @@ namespace FootballManagerMVC.Controllers
         public async Task<IActionResult> Index(string? keyword, string? sortBy, bool desc = false, int? clubId = null, int pageNumber = 1)
         {
             // Gửi query đến API (API của bạn nên hỗ trợ các query params này)
-            string endpoint = $"footballers?keyword={keyword}&sortBy={sortBy}&desc={desc}&clubId={clubId}&pageNumber={pageNumber}&pageSize={PageSize}";
+            string endpoint = $"admin/footballers?keyword={keyword}&sortBy={sortBy}&desc={desc}&clubId={clubId}&pageNumber={pageNumber}&pageSize={PageSize}";
             var response = await _api.GetAsync<PagedResponse<Footballer>>(endpoint);
 
             // Lấy danh sách CLB để filter
-            ViewBag.Clubs = await _api.GetListAsync<Club>("clubs");
+            ViewBag.Clubs = await _api.GetListAsync<Club>("admin/clubs");
 
             // Gửi lại các tham số để hiển thị đúng khi user tìm kiếm/lọc
             ViewBag.Keyword = keyword;
@@ -36,13 +36,13 @@ namespace FootballManagerMVC.Controllers
 
         public async Task<IActionResult> FootballerDetails(int id)
         {
-            var f = await _api.GetAsync<Footballer>($"footballers/{id}");
+            var f = await _api.GetAsync<Footballer>($"admin/footballers/{id}");
             return f == null ? NotFound() : View(f);
         }
 
         public async Task<IActionResult> AdminCreate()
         {
-            ViewBag.Clubs = await _api.GetListAsync<Club>("clubs");
+            ViewBag.Clubs = await _api.GetListAsync<Club>("admin/clubs");
             return View();
         }
 
@@ -55,14 +55,14 @@ namespace FootballManagerMVC.Controllers
                 f.ClubId = null;
                 f.IsTransferListed = true;
             }
-            await _api.PostAsync("footballers", f);
+            await _api.PostAsync("admin/footballers", f);
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> AdminEdit(int id)
         {
-            ViewBag.Clubs = await _api.GetListAsync<Club>("clubs");
-            var f = await _api.GetAsync<Footballer>($"footballers/{id}");
+            ViewBag.Clubs = await _api.GetListAsync<Club>("admin/clubs");
+            var f = await _api.GetAsync<Footballer>($"admin/footballers/{id}");
             return f == null ? NotFound() : View(f);
         }
 
@@ -75,20 +75,20 @@ namespace FootballManagerMVC.Controllers
                 f.ClubId = null;
                 f.IsTransferListed = true;
             }
-            await _api.PutAsync($"footballers/{id}", f);
+            await _api.PutAsync($"admin/footballers/{id}", f);
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> AdminDelete(int id)
         {
-            var f = await _api.GetAsync<Footballer>($"footballers/{id}");
+            var f = await _api.GetAsync<Footballer>($"admin/footballers/{id}");
             return f == null ? NotFound() : View(f);
         }
 
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _api.DeleteAsync($"footballers/{id}");
+            await _api.DeleteAsync($"admin/footballers/{id}");
             return RedirectToAction(nameof(Index));
         }
     }

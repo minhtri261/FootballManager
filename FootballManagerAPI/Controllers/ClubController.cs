@@ -1,4 +1,5 @@
 ﻿using FootballManager.Business.DTOs;
+using FootballManager.Business.Services;
 using FootballManager.Business.Services.Interfaces;
 using FootballManager.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +20,6 @@ namespace FootballManagerAPI.Controllers
         public async Task<IActionResult> Get(int id)
         {
             var item = await _service.GetByIdAsync(id);
-            return item == null ? NotFound() : Ok(item);
-        }
-
-        [HttpGet("{id}/players")]
-        public async Task<IActionResult> GetWithPlayers(int id)
-        {
-            var item = await _service.GetWithPlayersAsync(id);
             return item == null ? NotFound() : Ok(item);
         }
 

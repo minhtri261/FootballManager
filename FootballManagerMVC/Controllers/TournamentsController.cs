@@ -18,7 +18,7 @@ namespace FootballManagerMVC.Controllers
 
         public async Task<IActionResult> Index(int pageNumber = 1)
         {
-            var list = await _api.GetListAsync<Tournament>("tournaments");
+            var list = await _api.GetListAsync<Tournament>("admin/tournaments");
             ViewBag.PageNumber = pageNumber;
             return View(list);
         }
@@ -26,7 +26,7 @@ namespace FootballManagerMVC.Controllers
         // ------------------ DETAILS ------------------
         public async Task<IActionResult> TournamentDetails(int id)
         {
-            var t = await _api.GetAsync<Tournament>($"tournaments/{id}/clubs");
+            var t = await _api.GetAsync<Tournament>($"admin/tournaments/{id}/clubs");
             return t == null ? NotFound() : View(t);
         }
 
@@ -40,7 +40,7 @@ namespace FootballManagerMVC.Controllers
         public async Task<IActionResult> AdminCreate(Tournament t)
         {
             if (!ModelState.IsValid) return View(t);
-            if (Request.Form.TryGetValue("RewardByRank", out var rewardJson))
+            if (Request.Form.TryGetValue("admin/RewardByRank", out var rewardJson))
             {
                 try
                 {
@@ -51,14 +51,14 @@ namespace FootballManagerMVC.Controllers
                     t.RewardByRank = new();
                 }
             }
-            await _api.PostAsync("tournaments", t);
+            await _api.PostAsync("admin/tournaments", t);
             return RedirectToAction(nameof(Index));
         }
 
         // ------------------ EDIT ------------------
         public async Task<IActionResult> AdminEdit(int id)
         {
-            var t = await _api.GetAsync<Tournament>($"tournaments/{id}");
+            var t = await _api.GetAsync<Tournament>($"admin/tournaments/{id}");
             return t == null ? NotFound() : View(t);
         }
 
@@ -66,7 +66,7 @@ namespace FootballManagerMVC.Controllers
         public async Task<IActionResult> AdminEdit(int id, Tournament t)
         {
             if (id != t.Id) return BadRequest();
-            if (Request.Form.TryGetValue("RewardByRank", out var rewardJson))
+            if (Request.Form.TryGetValue("admin/RewardByRank", out var rewardJson))
             {
                 try
                 {
@@ -77,21 +77,21 @@ namespace FootballManagerMVC.Controllers
                     t.RewardByRank = new();
                 }
             }
-            await _api.PutAsync($"tournaments/{id}", t);
+            await _api.PutAsync($"admin/tournaments/{id}", t);
             return RedirectToAction(nameof(Index));
         }
 
         // ------------------ DELETE ------------------
         public async Task<IActionResult> AdminDelete(int id)
         {
-            var t = await _api.GetAsync<Tournament>($"tournaments/{id}");
+            var t = await _api.GetAsync<Tournament>($"admin/tournaments/{id}");
             return t == null ? NotFound() : View(t);
         }
 
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _api.DeleteAsync($"tournaments/{id}");
+            await _api.DeleteAsync($"admin/tournaments/{id}");
             return RedirectToAction(nameof(Index));
         }
 
@@ -151,11 +151,11 @@ namespace FootballManagerMVC.Controllers
         // Danh sách các trận đấu trong giải đấu
         public async Task<IActionResult> ListMatches(int id)
         {
-            var tournament = await _api.GetAsync<Tournament>($"tournaments/{id}/clubs");
+            var tournament = await _api.GetAsync<Tournament>($"admin/tournaments/{id}/clubs");
             if (tournament == null)
                 return NotFound();
 
-            var matches = await _api.GetListAsync<Match>($"tournamentclub/{id}/matches");
+            var matches = await _api.GetListAsync<Match>($"admin/tournamentclub/{id}/matches");
             tournament.Matches = matches?.ToList() ?? new();
 
             return View("TournamentDetails", tournament);

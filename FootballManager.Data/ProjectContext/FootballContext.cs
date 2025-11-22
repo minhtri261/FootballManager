@@ -14,6 +14,8 @@ namespace FootballManager.Data
         public DbSet<Match> Matches => Set<Match>();
         public DbSet<Transfer> Transfers => Set<Transfer>();
         public DbSet<SeasonSummary> SeasonSummaries => Set<SeasonSummary>();
+        public DbSet<GameState> GameStates => Set<GameState>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

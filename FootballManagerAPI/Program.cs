@@ -30,12 +30,13 @@ namespace FootballManagerAPI
 
             // ✅ Add DI (từ Business layer)
             builder.Services.AddBusinessServices();
+            builder.Services.Configure<GameSettings>(builder.Configuration);
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
                 {
                     policy
-                        .WithOrigins( "http://localhost:7057") 
+                        .WithOrigins( "https://localhost:7057" , "https://localhost:7088") 
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();

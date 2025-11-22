@@ -94,8 +94,11 @@
         .sidebar.collapsed .sidebar-header span {
             display: none;
         }
+
+
     </style>
 </head>
+
 <body>
     <div class="main-container">
         <!-- Sidebar -->
@@ -152,5 +155,77 @@
     </script>
 
     @RenderSection("Scripts", required: false)
+
+    <!-- Game Phase Button -->
+    <button id="gamePhaseBtn" class="btn btn-primary rounded-pill shadow-lg px-4 py-2"
+            style="position: fixed; bottom: 25px; right: 25px; z-index: 9999; display: none;">
+        <span id="gamePhaseText">Đang tải...</span>
+    </button>
+
+    <script>
+        const phaseBtn = document.getElementById("gamePhaseBtn");
+        const phaseText = document.getElementById("gamePhaseText");
+        const apiBase = "https://localhost:7088/api";
+
+        async function loadGameState() {
+            try {
+                const res = await fetch(`${apiBase}/game/state`);
+                if (!res.ok) throw new Error("Không thể tải trạng thái game.");
+                const data = await res.json();
+                updatePhaseButton(data.state.currentPhase);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function updatePhaseButton(phase) {
+            switch (phase) {
+                case 0:
+                    phaseText.textContent = "🎮 Bắt đầu trò chơi";
+                    phaseBtn.onclick = () => nextPhase();
+                    break;
+                case 1:
+                    phaseText.textContent = "✅ Chốt đội hình mùa này";
+                    phaseBtn.onclick = () => nextPhase();
+                    break;
+                case 2:
+                    phaseText.textContent = "⚽ Trận đấu tiếp theo";
+                    phaseBtn.onclick = () => nextMatch();
+                    break;
+                case 3:
+                    phaseText.textContent = "🏁 Kết thúc mùa giải";
+                    phaseBtn.onclick = () => nextPhase();
+                    break;
+                default:
+                    phaseText.textContent = "Không rõ giai đoạn";
+                    phaseBtn.onclick = null;
+                    break;
+            }
+            phaseBtn.style.display = "block";
+        }
+
+        async function nextPhase() {
+            if (!confirm("Bạn có chắc muốn chuyển sang giai đoạn tiếp theo?")) return;
+            try {
+                const res = await fetch(`${apiBase}/game/next-phase`, { method: "POST" });
+                if (!res.ok) throw new Error("API lỗi");
+                const data = await res.json();
+                alert(data.message);
+                updatePhaseButton(data.state.currentPhase);
+            } catch (err) {
+                alert("Lỗi khi chuyển giai đoạn.");
+                console.error(err);
+            }
+        }
+
+        async function nextMatch() {
+            // TODO: Khi bạn tạo API riêng cho trận đấu, gọi ở đây.
+            alert("⚽ Giả lập: Trận đấu tiếp theo (API chưa có).");
+        }
+
+        loadGameState();
+    </script>
+
 </body>
 </html>
+

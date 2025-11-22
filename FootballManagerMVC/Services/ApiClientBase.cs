@@ -26,5 +26,9 @@ namespace FootballManager.Web.Services
 
         public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
             => await _http.DeleteAsync(endpoint);
+
+        public async Task<HttpResponseMessage> PostAsync(string endpoint)
+    => await _http.PostAsync(endpoint, null);
+
     }
 }
