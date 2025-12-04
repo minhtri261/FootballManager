@@ -15,8 +15,9 @@ namespace FootballManager.Data
         public DbSet<Transfer> Transfers => Set<Transfer>();
         public DbSet<SeasonSummary> SeasonSummaries => Set<SeasonSummary>();
         public DbSet<GameState> GameStates => Set<GameState>();
-
-
+        public DbSet<MatchLineup> MatchLineups => Set<MatchLineup>();
+        public DbSet<MatchLineupPlayer> MatchLineupPlayers => Set<MatchLineupPlayer>();
+        public DbSet<MatchGoal> MatchGoals => Set<MatchGoal>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -147,6 +148,65 @@ namespace FootballManager.Data
                     .WithMany()
                     .HasForeignKey(s => s.MVPFootballerId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ---- MATCH LINEUP ----
+            modelBuilder.Entity<MatchLineup>(b =>
+            {
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.Formation)
+                    .IsRequired()
+                    .HasMaxLength(10);
+
+                b.HasOne(ml => ml.Match)
+                    .WithMany(m => m.MatchLineups)
+                    .HasForeignKey(ml => ml.MatchId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                b.HasOne(ml => ml.Club)
+                    .WithMany(c => c.MatchLineups)
+                    .HasForeignKey(ml => ml.ClubId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ---- MATCH LINEUP PLAYER ----
+            modelBuilder.Entity<MatchLineupPlayer>(b =>
+            {
+                b.HasKey(x => x.Id);
+
+                b.HasOne(mlp => mlp.MatchLineup)
+                    .WithMany(ml => ml.Players)
+                    .HasForeignKey(mlp => mlp.MatchLineupId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                b.HasOne(mlp => mlp.Footballer)
+                    .WithMany()
+                    .HasForeignKey(mlp => mlp.FootballerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ---- MATCH GOAL ----
+            modelBuilder.Entity<MatchGoal>(b =>
+            {
+                b.HasKey(x => x.Id);
+
+                b.HasOne(mg => mg.Match)
+                    .WithMany(m => m.Goals)
+                    .HasForeignKey(mg => mg.MatchId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                b.HasOne(mg => mg.Footballer)
+                    .WithMany()
+                    .HasForeignKey(mg => mg.FootballerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasOne(mg => mg.Club)
+                    .WithMany()
+                    .HasForeignKey(mg => mg.ClubId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                b.Property(mg => mg.IsOwnGoal);
             });
         }
     }

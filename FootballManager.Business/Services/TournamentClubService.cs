@@ -37,6 +37,10 @@ namespace FootballManager.Business.Services
             {
                 TournamentId = tournamentId,
                 ClubId = clubId,
+                Played = 0,
+                Won = 0,
+                Drawn = 0,
+                Lost = 0,
                 Points = 0,
                 Rank = 0,
                 GoalsFor = 0,
@@ -57,7 +61,12 @@ namespace FootballManager.Business.Services
                 {
                     tc.ClubId,
                     tc.Club!.Name,
+                    tc.Won,
+                    tc.Drawn,
+                    tc.Lost,
                     tc.Points,
+                    tc.GoalsFor,
+                    tc.GoalsAgainst,
                     tc.Rank
                 })
                 .ToListAsync<object>();

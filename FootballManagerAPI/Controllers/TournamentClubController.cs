@@ -47,7 +47,7 @@ namespace FootballManager.API.Controllers
             }
         }
 
-
+        // Tạo lịch thi đấu cho giải đấu
         [HttpPost("{id}/generate-matches")]
         public async Task<IActionResult> GenerateMatches(int id)
         {
@@ -61,5 +61,8 @@ namespace FootballManager.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        //Xem bảng xếp hạng của giải đấu
+
     }
 }

@@ -4,6 +4,7 @@ using FootballManager.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FootballManager.Data.Migrations
 {
     [DbContext(typeof(FootballContext))]
-    partial class FootballContextModelSnapshot : ModelSnapshot
+    [Migration("20251122155118_UpdateMatch")]
+    partial class UpdateMatch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -192,88 +195,6 @@ namespace FootballManager.Data.Migrations
                     b.HasIndex("TournamentId");
 
                     b.ToTable("Matches");
-                });
-
-            modelBuilder.Entity("FootballManager.Data.Entities.MatchGoal", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ClubId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FootballerId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsOwnGoal")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("MatchId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClubId");
-
-                    b.HasIndex("FootballerId");
-
-                    b.HasIndex("MatchId");
-
-                    b.ToTable("MatchGoals");
-                });
-
-            modelBuilder.Entity("FootballManager.Data.Entities.MatchLineup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ClubId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Formation")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<int>("MatchId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClubId");
-
-                    b.HasIndex("MatchId");
-
-                    b.ToTable("MatchLineups");
-                });
-
-            modelBuilder.Entity("FootballManager.Data.Entities.MatchLineupPlayer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("FootballerId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MatchLineupId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FootballerId");
-
-                    b.HasIndex("MatchLineupId");
-
-                    b.ToTable("MatchLineupPlayers");
                 });
 
             modelBuilder.Entity("FootballManager.Data.Entities.SeasonSummary", b =>
@@ -473,71 +394,6 @@ namespace FootballManager.Data.Migrations
                     b.Navigation("Tournament");
                 });
 
-            modelBuilder.Entity("FootballManager.Data.Entities.MatchGoal", b =>
-                {
-                    b.HasOne("FootballManager.Data.Entities.Club", "Club")
-                        .WithMany()
-                        .HasForeignKey("ClubId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("FootballManager.Data.Entities.Footballer", "Footballer")
-                        .WithMany()
-                        .HasForeignKey("FootballerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("FootballManager.Data.Entities.Match", "Match")
-                        .WithMany("Goals")
-                        .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Club");
-
-                    b.Navigation("Footballer");
-
-                    b.Navigation("Match");
-                });
-
-            modelBuilder.Entity("FootballManager.Data.Entities.MatchLineup", b =>
-                {
-                    b.HasOne("FootballManager.Data.Entities.Club", "Club")
-                        .WithMany("MatchLineups")
-                        .HasForeignKey("ClubId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FootballManager.Data.Entities.Match", "Match")
-                        .WithMany("MatchLineups")
-                        .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Club");
-
-                    b.Navigation("Match");
-                });
-
-            modelBuilder.Entity("FootballManager.Data.Entities.MatchLineupPlayer", b =>
-                {
-                    b.HasOne("FootballManager.Data.Entities.Footballer", "Footballer")
-                        .WithMany()
-                        .HasForeignKey("FootballerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("FootballManager.Data.Entities.MatchLineup", "MatchLineup")
-                        .WithMany("Players")
-                        .HasForeignKey("MatchLineupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Footballer");
-
-                    b.Navigation("MatchLineup");
-                });
-
             modelBuilder.Entity("FootballManager.Data.Entities.SeasonSummary", b =>
                 {
                     b.HasOne("FootballManager.Data.Entities.Club", "ChampionClub")
@@ -623,26 +479,12 @@ namespace FootballManager.Data.Migrations
 
                     b.Navigation("HomeMatches");
 
-                    b.Navigation("MatchLineups");
-
                     b.Navigation("TournamentClubs");
                 });
 
             modelBuilder.Entity("FootballManager.Data.Entities.Footballer", b =>
                 {
                     b.Navigation("Transfers");
-                });
-
-            modelBuilder.Entity("FootballManager.Data.Entities.Match", b =>
-                {
-                    b.Navigation("Goals");
-
-                    b.Navigation("MatchLineups");
-                });
-
-            modelBuilder.Entity("FootballManager.Data.Entities.MatchLineup", b =>
-                {
-                    b.Navigation("Players");
                 });
 
             modelBuilder.Entity("FootballManager.Data.Entities.Tournament", b =>

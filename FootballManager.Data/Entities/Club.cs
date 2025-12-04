@@ -24,5 +24,7 @@ namespace FootballManager.Data.Entities
         public ICollection<TournamentClub> TournamentClubs { get; set; } = new List<TournamentClub>();
         public ICollection<Match> HomeMatches { get; set; } = new List<Match>();
         public ICollection<Match> AwayMatches { get; set; } = new List<Match>();
+
+        public ICollection<MatchLineup> MatchLineups { get; set; } = new List<MatchLineup>();
     }
 }

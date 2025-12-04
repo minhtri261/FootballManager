@@ -24,5 +24,21 @@ namespace FootballManager.Data.Repositories
                 .Include(t => t.Matches)       // ✅ load danh sách trận (nếu có)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
+
+        //Lấy tất cả các giải đấu theo SeasonNumber
+        public async Task<List<Tournament>> GetBySeasonNumberAsync(int seasonNumber)
+        {
+            return await _dbSet
+                .Where(t => t.SeasonNumber == seasonNumber)
+                .Include(t => t.Matches)
+                .ToListAsync();
+        }
+
+        //Lấy TournamentClub theo TournamentId và ClubId
+        public async Task<TournamentClub?> GetTournamentClubAsync(int tournamentId, int clubId)
+        {
+            return await _context.TournamentClubs
+                .FirstOrDefaultAsync(tc => tc.TournamentId == tournamentId && tc.ClubId == clubId);
+        }
     }
 }

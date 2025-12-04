@@ -21,6 +21,8 @@ namespace FootballManager.Business
             services.AddScoped<IMatchRepository, MatchRepository>();
             services.AddScoped<IGameStateRepository, GameStateRepository>();
             services.AddScoped<ITransferRepository, TransferRepository>();
+            services.AddScoped<IMatchLineupRepository, MatchLineupRepository>();
+            services.AddScoped<IMatchStatsRepository, MatchStatsRepository>();
 
             // Services
             services.AddScoped<IFootballerService, FootballerService>();
@@ -30,6 +32,9 @@ namespace FootballManager.Business
             services.AddScoped<TournamentMatchService>();
             services.AddScoped<IGameStateService, GameStateService>();
             services.AddScoped<ITransferService, TransferService>();
+            services.AddScoped<IBotLineupService, BotLineupService>();
+            services.AddScoped<IMatchService, MatchService>();
+            services.AddScoped<RandomResultService>();
 
             return services;
         }
