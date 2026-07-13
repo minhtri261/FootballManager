@@ -33,7 +33,7 @@ namespace FootballManagerMVC
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Clubs}/{action=Index}/{id?}");
+                pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
             app.Run();
         }

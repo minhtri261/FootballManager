@@ -2,11 +2,11 @@
 {
     public class Match
     {
-        public int Id { get; set; }
+        public int MatchId { get; set; }
         public int TournamentId { get; set; }
         public Tournament? Tournament { get; set; }
 
-
+        public bool IsPlayed { get; set; } = false;
         public int HomeClubId { get; set; }
         public Club? HomeClub { get; set; }
 

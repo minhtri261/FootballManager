@@ -2,8 +2,9 @@
 
 namespace FootballManager.Data.Repositories.Interfaces
 {
-    public interface IGameStateRepository : IGenericRepository<GameState>
+    public interface IGameStateRepository : IBaseRepository<GameState>
     {
-        Task<GameState> GetSingletonAsync();
+        Task<GameState?> GetCurrentStateAsync();
+        Task<ScheduleTemplate?> GetTemplateByWeekAsync(int week);
     }
 }

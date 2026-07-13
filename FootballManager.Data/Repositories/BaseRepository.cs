@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace FootballManager.Data.Repositories
 {
-    public class BaseRepository<T> : IGenericRepository<T> where T : class
+    public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
         protected readonly FootballContext _context;
         protected readonly DbSet<T> _dbSet;
@@ -15,19 +15,34 @@ namespace FootballManager.Data.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
+        public IQueryable<T> GetAll()
+        {
+            return _dbSet.AsQueryable();
+        }
 
-        public virtual async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
+        public async Task<T?> GetByIdAsync(object id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
 
-        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
-            => await _dbSet.Where(predicate).ToListAsync();
+        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.Where(predicate).ToListAsync();
+        }
 
-        public virtual async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
+        public async Task AddAsync(T entity)
+        {
+            await _dbSet.AddAsync(entity);
+        }
 
-        public virtual void Update(T entity) => _dbSet.Update(entity);
+        public void Update(T entity)
+        {
+            _dbSet.Update(entity);
+        }
 
-        public virtual void Delete(T entity) => _dbSet.Remove(entity);
-
-        public virtual async Task SaveChangesAsync() => await _context.SaveChangesAsync();
+        public void Delete(T entity)
+        {
+            _dbSet.Remove(entity);
+        }
     }
 }

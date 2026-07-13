@@ -1,4 +1,6 @@
-﻿namespace FootballManager.Business.DTOs
+﻿using FootballManager.Data.Entities;
+
+namespace FootballManager.Business.DTOs
 {
     public class FootballerDto
     {
@@ -9,7 +11,7 @@
         public string Position { get; set; } = string.Empty;
         public int Quality { get; set; }
         public int ContractYears { get; set; }
-        public string Status { get; set; } = "Trẻ";
+        public PlayerLifeCycle Status { get; set; } = PlayerLifeCycle.Youth;
         public bool IsTransferListed { get; set; }
 
         public int? ClubId { get; set; }

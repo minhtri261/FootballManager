@@ -15,33 +15,18 @@ namespace FootballManagerAPI.Controllers
             _gameService = gameService;
         }
 
-        [HttpGet("state")]
-        public async Task<IActionResult> GetState()
+        [HttpPost("next-week")]
+        public async Task<IActionResult> NextWeek()
         {
-            var state = await _gameService.GetStateAsync();
-            return Ok(new
+            try
             {
-                state = new
-                {
-                    state.CurrentSeason,
-                    state.CurrentPhase
-                }
-            });
-        }
-
-        [HttpPost("next-phase")]
-        public async Task<IActionResult> NextPhase()
-        {
-            var state = await _gameService.NextPhaseAsync();
-            return Ok(new
+                var result = await _gameService.AdvanceNextWeekAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
             {
-                message = "Chuyển sang giai đoạn tiếp theo thành công",
-                state = new
-                {
-                    state.CurrentSeason,
-                    state.CurrentPhase
-                }
-            });
+                return BadRequest(new { error = ex.Message });
+            }
         }
-     }
+    }
 }

@@ -18,6 +18,7 @@ namespace FootballManager.Data
         public DbSet<MatchLineup> MatchLineups => Set<MatchLineup>();
         public DbSet<MatchLineupPlayer> MatchLineupPlayers => Set<MatchLineupPlayer>();
         public DbSet<MatchGoal> MatchGoals => Set<MatchGoal>();
+        public DbSet<ScheduleTemplate> ScheduleTemplates => Set<ScheduleTemplate>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -45,6 +46,8 @@ namespace FootballManager.Data
                     .WithMany(c => c.Footballers)
                     .HasForeignKey(x => x.ClubId)
                     .OnDelete(DeleteBehavior.SetNull);
+                b.Property(x => x.Status)
+                    .HasConversion<int>();
             });
 
             // ---- TOURNAMENT ----
@@ -78,7 +81,6 @@ namespace FootballManager.Data
             modelBuilder.Entity<Match>(b =>
             {
                 b.HasKey(x => x.Id);
-
                 b.HasOne(m => m.Tournament)
                     .WithMany(t => t.Matches)
                     .HasForeignKey(m => m.TournamentId)
@@ -99,6 +101,9 @@ namespace FootballManager.Data
                     .HasForeignKey(m => m.MVPFootballerId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
+
+            modelBuilder.Entity<Match>()
+                .HasIndex(m => new { m.SeasonNumber, m.Week });
 
             // ---- TRANSFER ----
             modelBuilder.Entity<Transfer>(b =>
@@ -207,6 +212,22 @@ namespace FootballManager.Data
                     .OnDelete(DeleteBehavior.Restrict);
 
                 b.Property(mg => mg.IsOwnGoal);
+            });
+
+            // ---- SCHEDULE TEMPLATE ----
+            modelBuilder.Entity<ScheduleTemplate>(b =>
+            {
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Description).HasMaxLength(500);
+                // Có thể thêm Index cho Week để Query lịch nhanh hơn
+                b.HasIndex(x => x.Week);
+            });
+
+            // ---- GAME STATE ----
+            modelBuilder.Entity<GameState>(b =>
+            {
+                b.HasKey(x => x.Id);
+                // Thường chỉ có 1 bản ghi GameState, nên có thể seed dữ liệu mặc định ở đây
             });
         }
     }

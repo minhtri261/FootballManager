@@ -2,14 +2,9 @@
 
 namespace FootballManager.Business.Services.Interfaces
 {
-    public interface IBotLineupService : IBaseService<MatchLineup>
+    public interface IBotLineupService
     {
-        Task<string> CreateBotLineupAsync(
-            int tournamentId,
-            int botClubId,
-            int opponentClubId,
-            int matchId
-        );
+        Task SetupBotLineupsForSeasonAsync(int seasonNumber);
     }
 
 }

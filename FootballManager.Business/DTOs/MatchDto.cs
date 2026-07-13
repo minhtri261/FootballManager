@@ -16,4 +16,11 @@ namespace FootballManager.Business.DTOs
         public int AwayGoals { get; set; }
     }
 
+    public class NextTournamentDto
+    {
+        public int TournamentId { get; set; }
+        public int Round { get; set; }
+    }
+
+
 }

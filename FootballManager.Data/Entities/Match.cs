@@ -10,6 +10,8 @@ namespace FootballManager.Data.Entities
     {
         public int Id { get; set; }
         public int TournamentId { get; set; }
+        public int Week { get; set; }
+        public int SeasonNumber { get; set; }
         public Tournament? Tournament { get; set; }
 
 

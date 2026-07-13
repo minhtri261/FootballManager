@@ -18,7 +18,6 @@ namespace FootballManager.Data.Entities
         public int NationalCups { get; set; }
         public int TrainingQuality { get; set; }
         public bool IsBot { get; set; }
-        public bool IsFinalized { get; set; } = false;
         // Navigation
         public ICollection<Footballer> Footballers { get; set; } = new List<Footballer>();
         public ICollection<TournamentClub> TournamentClubs { get; set; } = new List<TournamentClub>();

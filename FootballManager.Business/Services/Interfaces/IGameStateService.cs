@@ -1,10 +1,9 @@
-﻿using FootballManager.Data.Entities;
+﻿using FootballManager.Business.DTOs;
 
 namespace FootballManager.Business.Services.Interfaces
 {
     public interface IGameStateService
     {
-        Task<GameState> GetStateAsync();
-        Task<GameState> NextPhaseAsync();
+        Task<GameStepResultDto> AdvanceNextWeekAsync();
     }
 }

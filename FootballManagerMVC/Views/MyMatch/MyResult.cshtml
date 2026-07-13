@@ -1,0 +1,50 @@
+﻿@model FootballManagerMVC.Models.MyMatchResultDto
+
+@{
+    ViewData["Title"] = " Kết quả";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (!Model.HasMatch)
+{
+    <div class="card p-4 text-center">
+        <h3>Vòng này bạn được nghỉ</h3>
+
+        <a class="btn btn-primary"
+           asp-action="RoundResult"
+           asp-route-tournamentId="@ViewBag.TournamentId">
+            Tiếp tục
+        </a>
+    </div>
+}
+else
+{
+    var m = Model.Match!;
+
+    <div class="card p-4 text-center">
+        <h3>@m.HomeGoals - @m.AwayGoals</h3>
+        <p>Kết quả: @m.Result</p>
+
+        <a class="btn btn-primary"
+           asp-action="RoundResult"
+           asp-route-tournamentId="@ViewBag.TournamentId">
+            Tiếp tục
+        </a>
+    </div>
+}
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const url = new URL(window.location.href);
+        const tid = url.searchParams.get("tournamentId");
+
+        if (!tid) {
+            const storedTid = localStorage.getItem("currentTournamentId");
+            if (storedTid) {
+                url.searchParams.set("tournamentId", storedTid);
+                window.location.href = url.toString();
+            }
+        }
+    });
+</script>
+

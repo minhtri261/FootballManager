@@ -2,11 +2,12 @@
 
 namespace FootballManager.Data.Repositories.Interfaces
 {
-    public interface ITournamentRepository : IGenericRepository<Tournament>
+    public interface ITournamentRepository : IBaseRepository<Tournament>
     {
-        Task<Tournament?> GetWithClubsAsync(int id);
-        Task<List<Tournament>> GetBySeasonNumberAsync(int seasonNumber);
+        // Lấy BXH của giải đấu theo tournamentId
+        Task<List<TournamentClub>> GetStandingsAsync(int tournamentId);
 
-        Task<TournamentClub?> GetTournamentClubAsync(int tournamentId, int clubId);
-    }
+        // Lấy danh sách các giải đấu theo seasonNumber
+        Task<List<Tournament>> GetTournamentsBySeasonAsync(int seasonNumber);
+     }
 }

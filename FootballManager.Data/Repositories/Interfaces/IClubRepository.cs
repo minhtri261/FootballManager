@@ -3,16 +3,9 @@ using System.Numerics;
 
 namespace FootballManager.Data.Repositories.Interfaces
 {
-    public interface IClubRepository : IGenericRepository<Club>
+    public interface IClubRepository : IBaseRepository<Club>
     {
-        Task<Club?> GetWithPlayersAsync(int id);
-        Task<IEnumerable<Footballer>> GetPlayersByClubIdAsync(int clubId);
-        Task<Footballer?> GetPlayerByIdAsync(int id);
-
-        Task<int> CountByClubAsync(int clubId);
-
-        Task SetClubFinalizedAsync(int clubId, bool isFinalized);
-
-        Task<int> CountByPositionAsync(int clubId, string position);
+        // Lấy tất cả Club là Bot cùng với danh sách Footballers của họ
+        Task<List<Club>> GetBotClubsWithPlayersAsync();
     }
 }

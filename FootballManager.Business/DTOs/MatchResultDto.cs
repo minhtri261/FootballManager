@@ -19,4 +19,11 @@ namespace FootballManager.Business.DTOs
         public int FootballerId { get; set; }
         public bool IsOwnGoal { get; set; }
     }
+    public class MyMatchResultDto
+    {
+        public bool HasMatch { get; set; }
+
+        public MatchResultDto? Match { get; set; }
+    }
+
 }

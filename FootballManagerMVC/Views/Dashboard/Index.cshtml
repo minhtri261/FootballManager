@@ -1,0 +1,292 @@
+@model FootballManagerMVC.Models.DashboardViewModel
+@{
+    ViewData["Title"] = Model.Club.Name;
+    var gs = Model.GameState;
+    var club = Model.Club;
+
+    string PhaseLabel(int phase) => phase switch {
+        0 => "Tiền mùa giải",
+        1 => "Chuyển nhượng",
+        2 => "Trong mùa",
+        3 => "Tổng kết",
+        _ => "—"
+    };
+
+    string NextWeekBtnLabel(int phase) => phase switch {
+        0 => "Bắt đầu mùa giải",
+        1 => "Chốt chuyển nhượng",
+        2 => "Chuyển vòng tiếp theo",
+        3 => "Sang mùa giải mới",
+        _ => "Chuyển tuần"
+    };
+
+    string ResultBadge(MatchDashVm m) {
+        if (!m.IsPlayed) return "";
+        bool isWin = (m.IsHome && m.Result == "HomeWin") || (!m.IsHome && m.Result == "AwayWin");
+        bool isDraw = m.Result == "Draw";
+        if (isWin) return "success";
+        if (isDraw) return "warning";
+        return "danger";
+    }
+
+    string ResultLabel(MatchDashVm m) {
+        if (!m.IsPlayed) return "";
+        bool isWin = (m.IsHome && m.Result == "HomeWin") || (!m.IsHome && m.Result == "AwayWin");
+        bool isDraw = m.Result == "Draw";
+        if (isWin) return "T";
+        if (isDraw) return "H";
+        return "B";
+    }
+
+    string QualityColor(int q) => q switch {
+        >= 85 => "text-warning fw-bold",
+        >= 70 => "text-success",
+        >= 55 => "text-primary",
+        _ => "text-secondary"
+    };
+
+    string PositionBadge(string pos) => pos switch {
+        "GK" => "bg-warning text-dark",
+        "CB" or "LB" or "RB" => "bg-success",
+        "DM" or "CM" or "AM" => "bg-primary",
+        "LW" or "RW" => "bg-info text-dark",
+        "ST" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
+
+<!-- Header -->
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="mb-0 fw-bold">⚽ @club.Name</h2>
+        <small class="text-muted">@club.Nation &nbsp;|&nbsp; Mùa @gs.CurrentSeason &nbsp;|&nbsp; Tuần @gs.CurrentWeek &nbsp;|&nbsp; @PhaseLabel(gs.CurrentPhase)</small>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <div class="text-end">
+            <div class="fs-5 fw-bold text-success">$@club.Money.ToString("N0")</div>
+            <small class="text-muted">
+                <i class="bi bi-trophy-fill text-warning"></i> @club.LeagueCups
+                &nbsp;<i class="bi bi-trophy-fill text-secondary"></i> @club.NationalCups
+                &nbsp;<i class="bi bi-trophy-fill text-primary"></i> @club.ChampionsCups
+            </small>
+        </div>
+        <form asp-action="NextWeek" method="post">
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-skip-forward-fill me-1"></i>@NextWeekBtnLabel(gs.CurrentPhase)
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Trận tiếp theo -->
+@if (Model.NextMatch != null)
+{
+    var nm = Model.NextMatch;
+    <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg,#1a1a2e,#16213e);">
+        <div class="card-body text-white py-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <span class="badge bg-light text-dark me-2">Vòng @nm.Round</span>
+                    <span class="text-muted small">@nm.TournamentName</span>
+                    <div class="fs-6 mt-1 text-warning">Trận tiếp theo</div>
+                </div>
+                <div class="text-center flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-center gap-4">
+                        <div class="text-center">
+                            <div class="fs-5 fw-bold @(nm.IsHome ? "text-warning" : "")">@nm.HomeClubName</div>
+                            <small class="text-muted">Sân nhà</small>
+                        </div>
+                        <div class="fs-3 fw-bold text-muted">VS</div>
+                        <div class="text-center">
+                            <div class="fs-5 fw-bold @(!nm.IsHome ? "text-warning" : "")">@nm.AwayClubName</div>
+                            <small class="text-muted">Sân khách</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end">
+                    @if (nm.IsHome)
+                    {
+                        <span class="badge bg-warning text-dark fs-6">Sân nhà</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary fs-6">Sân khách</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle me-2"></i>Không có trận đấu tiếp theo trong lịch mùa này.
+    </div>
+}
+
+<!-- Đội hình + Kết quả gần đây -->
+<div class="row g-4 mb-4">
+
+    <!-- Đội hình hiện tại -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-people-fill me-2"></i>Đội hình (@Model.Players.Count cầu thủ)</span>
+                <span class="badge bg-secondary">Chất lượng TB: @(Model.Players.Any() ? Model.Players.Average(p => p.Quality).ToString("F0") : "—")</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Cầu thủ</th>
+                                <th class="text-center">Vị trí</th>
+                                <th class="text-center">Tuổi</th>
+                                <th class="text-center">Chất lượng</th>
+                                <th class="text-center">Tiềm năng</th>
+                                <th class="text-center">Hợp đồng</th>
+                                <th class="text-center">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model.Players.OrderBy(p => p.Position))
+                            {
+                                <tr>
+                                    <td>
+                                        @if (p.IsTransferListed)
+                                        {
+                                            <i class="bi bi-tag-fill text-warning me-1" title="Đang chuyển nhượng"></i>
+                                        }
+                                        <span class="fw-semibold">@p.Name</span>
+                                        <small class="text-muted ms-1">(@p.Nation)</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge @PositionBadge(p.Position)">@p.Position</span>
+                                    </td>
+                                    <td class="text-center">@p.Age</td>
+                                    <td class="text-center">
+                                        <span class="@QualityColor(p.Quality)">@p.Quality</span>
+                                    </td>
+                                    <td class="text-center text-muted">@p.Potential</td>
+                                    <td class="text-center">
+                                        @if (p.ContractYears <= 1)
+                                        {
+                                            <span class="text-danger fw-bold">@p.ContractYears năm</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@p.ContractYears năm</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <small class="text-muted">@p.Status</small>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kết quả gần đây -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
+                <i class="bi bi-clock-history me-2"></i>Kết quả gần đây
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.FinishedMatches.Any())
+                {
+                    <div class="p-3 text-muted text-center">Chưa có trận đấu nào.</div>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var m in Model.FinishedMatches)
+                        {
+                            <li class="list-group-item px-3 py-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-@ResultBadge(m) fs-6 px-2" style="min-width:28px">@ResultLabel(m)</span>
+                                    <div class="flex-grow-1">
+                                        <div class="small fw-semibold">
+                                            @m.HomeClubName <span class="text-muted">@m.HomeGoals – @m.AwayGoals</span> @m.AwayClubName
+                                        </div>
+                                        <div class="text-muted" style="font-size:0.75rem">
+                                            Vòng @m.Round &nbsp;·&nbsp; @m.TournamentName
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bảng xếp hạng các giải đấu -->
+@if (Model.Tournaments.Any())
+{
+    <h5 class="fw-bold mb-3"><i class="bi bi-trophy me-2 text-warning"></i>Bảng xếp hạng</h5>
+    <div class="row g-4">
+        @foreach (var t in Model.Tournaments)
+        {
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between">
+                        <span>@t.Name</span>
+                        <span class="badge bg-secondary">@t.Type</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th class="text-center" style="width:32px">#</th>
+                                        <th>CLB</th>
+                                        <th class="text-center">Trận</th>
+                                        <th class="text-center">T</th>
+                                        <th class="text-center">H</th>
+                                        <th class="text-center">B</th>
+                                        <th class="text-center">HS</th>
+                                        <th class="text-center fw-bold">Đ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var s in t.Standings)
+                                    {
+                                        <tr class="@(s.IsMyClub ? "table-warning" : "")">
+                                            <td class="text-center text-muted">@s.Rank</td>
+                                            <td>
+                                                @if (s.IsMyClub)
+                                                {
+                                                    <i class="bi bi-shield-fill-check text-warning me-1"></i>
+                                                }
+                                                <span class="@(s.IsMyClub ? "fw-bold" : "")">@s.ClubName</span>
+                                            </td>
+                                            <td class="text-center">@s.Played</td>
+                                            <td class="text-center text-success">@s.Won</td>
+                                            <td class="text-center text-muted">@s.Drawn</td>
+                                            <td class="text-center text-danger">@s.Lost</td>
+                                            <td class="text-center text-muted">@(s.GoalsFor - s.GoalsAgainst)</td>
+                                            <td class="text-center fw-bold">@s.Points</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-secondary">
+        <i class="bi bi-info-circle me-2"></i>Chưa có giải đấu nào trong mùa này.
+    </div>
+}

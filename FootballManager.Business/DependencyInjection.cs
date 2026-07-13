@@ -10,32 +10,20 @@ namespace FootballManager.Business
     {
         public static IServiceCollection AddBusinessServices(this IServiceCollection services)
         {
-            services.AddScoped(typeof(IGenericRepository<>), typeof(BaseRepository<>));
+            services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
 
             // ✅ Cụ thể từng entity ở dưới này
             // Repos
-            services.AddScoped<IFootballerRepository, FootballerRepository>();
-            services.AddScoped<IClubRepository, ClubRepository>();
             services.AddScoped<ITournamentRepository, TournamentRepository>();
             services.AddScoped<IMatchRepository, MatchRepository>();
             services.AddScoped<IGameStateRepository, GameStateRepository>();
-            services.AddScoped<ITransferRepository, TransferRepository>();
-            services.AddScoped<IMatchLineupRepository, MatchLineupRepository>();
-            services.AddScoped<IMatchStatsRepository, MatchStatsRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IClubRepository, ClubRepository>();
 
             // Services
-            services.AddScoped<IFootballerService, FootballerService>();
-            services.AddScoped<IClubService, ClubService>();
-            services.AddScoped<ITournamentService, TournamentService>();
-            services.AddScoped<TournamentClubService>();
-            services.AddScoped<TournamentMatchService>();
             services.AddScoped<IGameStateService, GameStateService>();
-            services.AddScoped<ITransferService, TransferService>();
-            services.AddScoped<IBotLineupService, BotLineupService>();
-            services.AddScoped<IMatchService, MatchService>();
-            services.AddScoped<RandomResultService>();
-
+            services.AddScoped<IBotLineupService, BotService>();
             return services;
         }
     }

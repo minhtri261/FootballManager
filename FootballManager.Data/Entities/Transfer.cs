@@ -17,7 +17,9 @@ namespace FootballManager.Data.Entities
         public Club? ToClub { get; set; }
         public decimal TransferFee { get; set; }
         public int ContractYears { get; set; }
-
-        public string Status { get; set; } = "Pending"; // "Pending", "Accepted", "Rejected"
+        public TransferStatus Status { get; set; } = TransferStatus.Pending;
     }
+    public enum TransferStatus { Pending, Accepted, Rejected, Cancelled }
 }
+
+

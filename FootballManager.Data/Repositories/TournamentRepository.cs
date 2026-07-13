@@ -8,37 +8,24 @@ namespace FootballManager.Data.Repositories
     {
         public TournamentRepository(FootballContext context) : base(context) { }
 
-        public async Task<Tournament?> GetWithClubsAsync(int id)
+        //Lấy BXH của giải đấu theo tournamentId và sắp xếp theo điểm, hiệu số bàn thắng bại, số bàn thắng
+        public async Task<List<TournamentClub>> GetStandingsAsync(int tournamentId)
         {
-            return await _dbSet
-                .Include(t => t.TournamentClubs)
-                    .ThenInclude(tc => tc.Club)
-                .FirstOrDefaultAsync(t => t.Id == id);
-        }
-
-        public override async Task<Tournament?> GetByIdAsync(int id)
-        {
-            return await _dbSet
-                .Include(t => t.TournamentClubs)
-                    .ThenInclude(tc => tc.Club)  // ✅ load cả thông tin CLB
-                .Include(t => t.Matches)       // ✅ load danh sách trận (nếu có)
-                .FirstOrDefaultAsync(t => t.Id == id);
-        }
-
-        //Lấy tất cả các giải đấu theo SeasonNumber
-        public async Task<List<Tournament>> GetBySeasonNumberAsync(int seasonNumber)
-        {
-            return await _dbSet
-                .Where(t => t.SeasonNumber == seasonNumber)
-                .Include(t => t.Matches)
+            return await _context.TournamentClubs
+                .Include(tc => tc.Club)
+                .Where(tc => tc.TournamentId == tournamentId)
+                .OrderByDescending(tc => tc.Points)
+                .ThenByDescending(tc => (tc.GoalsFor - tc.GoalsAgainst))
+                .ThenByDescending(tc => tc.GoalsFor)
                 .ToListAsync();
         }
 
-        //Lấy TournamentClub theo TournamentId và ClubId
-        public async Task<TournamentClub?> GetTournamentClubAsync(int tournamentId, int clubId)
+        //Lấy tất cả giải đấu theo seasonNumber
+        public async Task<List<Tournament>> GetTournamentsBySeasonAsync(int seasonNumber)
         {
-            return await _context.TournamentClubs
-                .FirstOrDefaultAsync(tc => tc.TournamentId == tournamentId && tc.ClubId == clubId);
+            return await _context.Tournaments
+                .Where(t => t.SeasonNumber == seasonNumber)
+                .ToListAsync();
         }
     }
 }

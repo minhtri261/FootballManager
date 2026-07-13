@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public int CurrentSeason { get; set; }
+        public int CurrentWeek { get; set; } // Từ 1 đến 51
         public GamePhase CurrentPhase { get; set; }
     }
 
