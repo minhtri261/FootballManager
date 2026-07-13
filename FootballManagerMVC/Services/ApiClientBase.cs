@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
 
-namespace FootballManager.Web.Services
+namespace FootballManagerMVC.Services
 {
     public class ApiClient
     {

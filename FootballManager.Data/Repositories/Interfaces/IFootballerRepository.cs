@@ -2,8 +2,9 @@
 
 namespace FootballManager.Data.Repositories.Interfaces
 {
-    public interface IFootballerRepository : IGenericRepository<Footballer>
+    public interface IFootballerRepository : IBaseRepository<Footballer>
     {
         Task<IEnumerable<Footballer>> GetByClubAsync(int clubId);
+        Task<int> CountByClubAsync(int clubId);
     }
 }

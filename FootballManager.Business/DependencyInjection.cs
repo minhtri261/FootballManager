@@ -20,10 +20,13 @@ namespace FootballManager.Business
             services.AddScoped<IGameStateRepository, GameStateRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IClubRepository, ClubRepository>();
+            services.AddScoped<IFootballerRepository, FootballerRepository>();
+            services.AddScoped<ITransferRepository, TransferRepository>();
 
             // Services
             services.AddScoped<IGameStateService, GameStateService>();
             services.AddScoped<IBotLineupService, BotService>();
+            services.AddScoped<ITransferService, TransferService>();
             return services;
         }
     }

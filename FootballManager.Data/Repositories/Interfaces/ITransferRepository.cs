@@ -2,7 +2,7 @@
 
 namespace FootballManager.Data.Repositories.Interfaces
 {
-    public interface ITransferRepository : IGenericRepository<Transfer>
+    public interface ITransferRepository : IBaseRepository<Transfer>
     {
         Task<List<Footballer>> GetListFootballerCanTransferAsync();
         Task AddFreeAgentOfferAsync(int clubId, int footballerId, int contractYears);
@@ -17,6 +17,8 @@ namespace FootballManager.Data.Repositories.Interfaces
         Task RejectTransferAsync(Transfer transfer);
 
         Task<List<Transfer>> GetPendingTransfersForClubAsync(int clubId, int footballerId);
+
+        Task<List<Transfer>> GetPendingTransfersWithDetailsAsync();
 
     }
 
