@@ -1,6 +1,6 @@
 # ⚽ Football Manager
 
-Game quản lý bóng đá theo lượt (turn-based), viết bằng **.NET 8 / ASP.NET Core Web API + EF Core**. Người chơi điều hành 1 CLB xuyên suốt nhiều mùa giải; hệ thống tự mô phỏng toàn bộ phần còn lại — lịch thi đấu, kết quả trận đấu, đối thủ AI, thị trường chuyển nhượng, và vòng đời sự nghiệp cầu thủ qua từng mùa.
+Phần mềm quản lý bóng đá mô phỏng, viết bằng **.NET 8 / ASP.NET Core Web API + EF Core**. Người dùng điều hành 1 CLB xuyên suốt nhiều mùa giải; hệ thống tự mô phỏng toàn bộ phần còn lại — lịch thi đấu, kết quả trận đấu, đối thủ AI, thị trường chuyển nhượng, và vòng đời sự nghiệp cầu thủ qua từng mùa.
 
 Dự án được xây theo hướng **backend-driven simulation**: gần như toàn bộ logic nghiệp vụ (sinh lịch thi đấu đa thể thức, mô phỏng trận đấu có trọng số, kinh tế chuyển nhượng, AI đối thủ) nằm ở tầng service, expose ra ngoài qua REST API — tách bạch hoàn toàn khỏi bất kỳ client cụ thể nào.
 
@@ -67,15 +67,3 @@ Migrate database (nên review migration trước khi update):
 ```bash
 dotnet ef database update --project FootballManager.Data --startup-project FootballManagerAPI
 ```
-
-## Định hướng mở rộng
-
-Những phần chưa làm, có thể phát triển tiếp:
-
-- Giao diện MVC/FE đầy đủ cho các API đã có (hiện chỉ Dashboard có UI)
-- Cho phép người chơi tự niêm yết cầu thủ của mình lên thị trường (hiện chỉ AI tự niêm yết)
-- Chấn thương, thẻ phạt, thể lực — các yếu tố ảnh hưởng khả năng ra sân
-- Authentication/phân quyền, hỗ trợ nhiều người chơi/nhiều CLB trên cùng 1 hệ thống
-- Chiến thuật chi tiết hơn (pressing, tempo...) thay vì chỉ chọn sơ đồ đội hình
-- API xem lại lịch sử nhiều mùa (dữ liệu `SeasonSummary` đã có, chưa có endpoint liệt kê)
-- Bộ automated test (unit/integration) — hiện toàn bộ được verify thủ công qua HTTP + truy vấn DB trực tiếp
