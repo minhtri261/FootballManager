@@ -27,6 +27,9 @@ namespace FootballManager.Business
             services.AddScoped<IGameStateService, GameStateService>();
             services.AddScoped<IBotLineupService, BotService>();
             services.AddScoped<ITransferService, TransferService>();
+            services.AddScoped<ISeasonService, SeasonService>();
+            services.AddScoped<IMyClubService, MyClubService>();
+            services.AddScoped<ITournamentService, TournamentService>();
             return services;
         }
     }

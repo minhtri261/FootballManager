@@ -19,6 +19,8 @@ namespace FootballManager.Data
         public DbSet<MatchLineupPlayer> MatchLineupPlayers => Set<MatchLineupPlayer>();
         public DbSet<MatchGoal> MatchGoals => Set<MatchGoal>();
         public DbSet<ScheduleTemplate> ScheduleTemplates => Set<ScheduleTemplate>();
+        public DbSet<PlayerSurname> PlayerSurnames => Set<PlayerSurname>();
+        public DbSet<PlayerGivenName> PlayerGivenNames => Set<PlayerGivenName>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -32,6 +34,8 @@ namespace FootballManager.Data
                     .HasMaxLength(200);
                 b.Property(x => x.Money)
                     .HasColumnType("decimal(18,2)");
+                b.Property(x => x.YouthTrainingQuality)
+                    .HasDefaultValue(1);
             });
 
             // ---- FOOTBALLER ----
@@ -221,6 +225,23 @@ namespace FootballManager.Data
                 b.Property(x => x.Description).HasMaxLength(500);
                 // Có thể thêm Index cho Week để Query lịch nhanh hơn
                 b.HasIndex(x => x.Week);
+            });
+
+            // ---- PLAYER SURNAME / GIVEN NAME (kho tên theo quốc gia, dùng để sinh cầu thủ trẻ) ----
+            modelBuilder.Entity<PlayerSurname>(b =>
+            {
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Nation).IsRequired().HasMaxLength(100);
+                b.Property(x => x.Name).IsRequired().HasMaxLength(100);
+                b.HasIndex(x => x.Nation);
+            });
+
+            modelBuilder.Entity<PlayerGivenName>(b =>
+            {
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Nation).IsRequired().HasMaxLength(100);
+                b.Property(x => x.Name).IsRequired().HasMaxLength(100);
+                b.HasIndex(x => x.Nation);
             });
 
             // ---- GAME STATE ----

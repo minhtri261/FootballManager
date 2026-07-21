@@ -5,6 +5,27 @@ namespace FootballManager.Business.Helpers
     public static class TransferCalculator
     {
         /// <summary>
+        /// Tính giá chuyển nhượng dựa trên Quality, dư địa phát triển (Potential), độ tuổi (PlayerLifeCycle)
+        /// và số năm hợp đồng còn lại.
+        /// </summary>
+        public static decimal CalculateTransferPrice(Footballer player)
+        {
+            double baseValue = Math.Pow(player.Quality, 1.5);
+            double potentialBonus = 1 + Math.Max(0, player.Potential - player.Quality) / 50.0;
+            double ageFactor = player.Status switch
+            {
+                PlayerLifeCycle.Youth => 1.3,
+                PlayerLifeCycle.Rising => 1.2,
+                PlayerLifeCycle.Peak => 1.0,
+                PlayerLifeCycle.Stable => 0.7,
+                _ => 0.4 // Veteran/Retired
+            };
+            double contractFactor = 0.4 + 0.15 * player.ContractYears;
+
+            return (decimal)(baseValue * potentialBonus * ageFactor * contractFactor);
+        }
+
+        /// <summary>
         /// Tính score của CLB cho cầu thủ
         /// </summary>
         public static double CalculateClubScore(Footballer player, Club club)

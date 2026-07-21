@@ -8,11 +8,6 @@ namespace FootballManager.Data.Repositories
     {
         public TransferRepository(FootballContext context) : base(context) { }
 
-        private static decimal CalculateTransferPrice(Footballer player)
-        {
-            return player.ContractYears * player.Quality;
-        }
-
         // Lấy danh sách cầu thủ đang được bán trên thị trường chuyển nhượng.
         public async Task<List<Footballer>> GetListFootballerCanTransferAsync()
         {
@@ -44,7 +39,7 @@ namespace FootballManager.Data.Repositories
         }
 
         // Gia hạn hợp đồng cho cầu thủ
-        public async Task RenewContractAsync(int clubId, int footballerId, int additionalYears)
+        public async Task RenewContractAsync(int clubId, int footballerId, int additionalYears, decimal price)
         {
             var footballer = await _context.Footballers
                 .Include(f => f.Club)
@@ -68,14 +63,12 @@ namespace FootballManager.Data.Repositories
             if (footballer.ContractYears > 1)
                 throw new Exception("Chỉ có thể gia hạn hợp đồng khi còn 1 năm.");
 
-            var fee = CalculateTransferPrice(footballer);
-
             var renewOffer = new Transfer
             {
                 FootballerId = footballerId,
                 FromClubId = clubId,
                 ToClubId = clubId,
-                TransferFee = fee,
+                TransferFee = price,
                 ContractYears = additionalYears,
                 Status = TransferStatus.Pending
             };
@@ -85,7 +78,7 @@ namespace FootballManager.Data.Repositories
         }
 
         // Gửi lời đề nghị chuyển nhượng cầu thủ đang thuộc CLB khác
-        public async Task AddTransferOfferAsync(int fromClubId, int footballerId, int toClubId, int contractYears)
+        public async Task AddTransferOfferAsync(int fromClubId, int footballerId, int toClubId, int contractYears, decimal price)
         {
             var footballer = await _context.Footballers
                 .Include(f => f.Club)
@@ -103,14 +96,13 @@ namespace FootballManager.Data.Repositories
             if (footballer.ClubId == toClubId)
                 throw new Exception("Cầu thủ này đã thuộc CLB của bạn.");
 
-            var fee = CalculateTransferPrice(footballer);
             var transfer = new Transfer
             {
                 FootballerId = footballerId,
                 FromClubId = footballer.ClubId,
                 ToClubId = toClubId,
                 ContractYears = contractYears,
-                TransferFee = fee,
+                TransferFee = price,
                 Status = TransferStatus.Pending
             };
 

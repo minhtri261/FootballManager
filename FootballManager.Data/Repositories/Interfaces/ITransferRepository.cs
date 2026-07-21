@@ -6,9 +6,9 @@ namespace FootballManager.Data.Repositories.Interfaces
     {
         Task<List<Footballer>> GetListFootballerCanTransferAsync();
         Task AddFreeAgentOfferAsync(int clubId, int footballerId, int contractYears);
-        Task RenewContractAsync(int clubId, int footballerId, int additionalYears);
+        Task RenewContractAsync(int clubId, int footballerId, int additionalYears, decimal price);
 
-        Task AddTransferOfferAsync(int fromClubId, int footballerId, int toClubId, int contractYears);
+        Task AddTransferOfferAsync(int fromClubId, int footballerId, int toClubId, int contractYears, decimal price);
 
         Task<bool> HasRenewOfferAsync(int footballerId, int clubId);
 

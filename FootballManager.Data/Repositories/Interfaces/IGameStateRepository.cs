@@ -6,5 +6,6 @@ namespace FootballManager.Data.Repositories.Interfaces
     {
         Task<GameState?> GetCurrentStateAsync();
         Task<ScheduleTemplate?> GetTemplateByWeekAsync(int week);
+        Task<List<ScheduleTemplate>> GetAllTemplatesAsync();
     }
 }

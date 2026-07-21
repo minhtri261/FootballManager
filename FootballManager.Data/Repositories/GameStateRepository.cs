@@ -13,5 +13,8 @@ namespace FootballManager.Data.Repositories
 
         public async Task<ScheduleTemplate?> GetTemplateByWeekAsync(int week)
             => await _context.ScheduleTemplates.FirstOrDefaultAsync(t => t.Week == week);
+
+        public async Task<List<ScheduleTemplate>> GetAllTemplatesAsync()
+            => await _context.ScheduleTemplates.ToListAsync();
     }
 }

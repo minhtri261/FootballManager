@@ -69,12 +69,20 @@ namespace FootballManager.Business.Services
 
         public async Task RenewContractAsync(int clubId, int footballerId, int additionalYears)
         {
-            await _transferRepository.RenewContractAsync(clubId, footballerId, additionalYears);
+            var footballer = await _footballerRepository.GetByIdAsync(footballerId);
+            if (footballer == null) throw new Exception("Không tìm thấy cầu thủ.");
+
+            var price = Helpers.TransferCalculator.CalculateTransferPrice(footballer);
+            await _transferRepository.RenewContractAsync(clubId, footballerId, additionalYears, price);
         }
 
         public async Task SendTransferOfferAsync(int fromClubId, int footballerId, int toClubId, int contractYears)
         {
-            await _transferRepository.AddTransferOfferAsync(fromClubId, footballerId, toClubId, contractYears);
+            var footballer = await _footballerRepository.GetByIdAsync(footballerId);
+            if (footballer == null) throw new Exception("Không tìm thấy cầu thủ.");
+
+            var price = Helpers.TransferCalculator.CalculateTransferPrice(footballer);
+            await _transferRepository.AddTransferOfferAsync(fromClubId, footballerId, toClubId, contractYears, price);
         }
 
         private static bool MatchesPositionGroup(PlayerPosition position, string group) => group switch
@@ -85,6 +93,48 @@ namespace FootballManager.Business.Services
             "CF" => position == PlayerPosition.ST,
             _ => false
         };
+
+        // Khung đội hình mục tiêu của Bot — dùng chung cho cả mua (BotDecideWhoToBuyOrRenewAsync) lẫn niêm yết dư thừa
+        private static readonly Dictionary<string, int> TargetSquadComposition = new()
+        {
+            ["GK"] = 2,
+            ["CB"] = 3,
+            ["Mid"] = 4,
+            ["CF"] = 3
+        };
+
+        // Bot tự niêm yết cầu thủ dư thừa (thừa so với khung đội hình mục tiêu) lên thị trường chuyển nhượng.
+        // Chỉ áp dụng cho CLB Bot — CLB người chơi tự quyết định niêm yết của mình.
+        public async Task BotListSurplusPlayersAsync()
+        {
+            _logger.LogInformation("=== BOT: NIÊM YẾT CẦU THỦ DƯ THỪA ===");
+            var botClubs = (await _clubRepository.GetAll().ToListAsync()).Where(c => c.IsBot).ToList();
+            var allPlayers = await _footballerRepository.GetAll().ToListAsync();
+
+            foreach (var club in botClubs)
+            {
+                var squad = allPlayers.Where(p => p.ClubId == club.Id && !p.IsTransferListed).ToList();
+
+                foreach (var group in TargetSquadComposition.Keys)
+                {
+                    var playersInGroup = squad
+                        .Where(f => MatchesPositionGroup(f.Position, group))
+                        .OrderBy(f => f.Quality)
+                        .ToList();
+
+                    int surplus = playersInGroup.Count - TargetSquadComposition[group];
+                    for (int i = 0; i < surplus; i++)
+                    {
+                        playersInGroup[i].IsTransferListed = true;
+                        _footballerRepository.Update(playersInGroup[i]);
+                        _logger.LogInformation("CLB {Club} niêm yết cầu thủ dư {Id} ({Name}, nhóm {Group})",
+                            club.Name, playersInGroup[i].Id, playersInGroup[i].Name, group);
+                    }
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+        }
 
         // BOT cầu thủ quyết định chấp nhận đề nghị chuyển nhượng
         public async Task BotDecideTransfersAsync()
@@ -268,13 +318,7 @@ namespace FootballManager.Business.Services
                     ["CF"] = currentPlayers.Count(f => f.Position == PlayerPosition.ST)
                 };
 
-                var targetCounts = new Dictionary<string, int>
-                {
-                    ["GK"] = 2,
-                    ["CB"] = 3,
-                    ["Mid"] = 4,
-                    ["CF"] = 3
-                };
+                var targetCounts = TargetSquadComposition;
 
                 var boughtFromClubThisRound = new Dictionary<int, int>();
                 int offersSent = 0;
@@ -320,11 +364,11 @@ namespace FootballManager.Business.Services
                         if (candidatesToRenew.Any())
                         {
                             var best = candidatesToRenew.First();
-                            var renewCost = (decimal)best.Quality;
+                            var renewCost = Helpers.TransferCalculator.CalculateTransferPrice(best);
                             _logger.LogInformation("Gia hạn cầu thủ {Id} ({Name}) với cost {Cost}", best.Id, best.Name, renewCost);
                             if (renewCost <= clubBudget)
                             {
-                                await _transferRepository.RenewContractAsync(club.Id, best.Id, 1);
+                                await _transferRepository.RenewContractAsync(club.Id, best.Id, 1, renewCost);
                                 clubBudget -= renewCost;
 
                                 positionCounts[pos]++;
@@ -337,7 +381,7 @@ namespace FootballManager.Business.Services
                         _logger.LogInformation("Không có ai để gia hạn → tìm cầu thủ Transfer Listed cho vị trí {Pos}", pos);
                         var availableFootballers = transferablePlayers
                             .Where(f => f.ClubId != club.Id && MatchesPositionGroup(f.Position, pos))
-                            .OrderByDescending(f => f.Quality)
+                            .OrderByDescending(f => f.Quality + (f.Potential - f.Quality) * 0.3) // ưu tiên xét trước cầu thủ tiềm năng cao khi Quality tương đương
                             .ThenBy(f => f.Age)
                             .ToList();
 
@@ -367,7 +411,7 @@ namespace FootballManager.Business.Services
                                     }
                                 }
 
-                                var price = CalculateTransferPriceForBudget(candidate);
+                                var price = Helpers.TransferCalculator.CalculateTransferPrice(candidate);
                                 if (price > clubBudget)
                                 {
                                     _logger.LogInformation("Giá {Price} > ngân sách {Budget} → bỏ qua", price, clubBudget);
@@ -384,7 +428,8 @@ namespace FootballManager.Business.Services
                             var avgQuality = currentPlayers.Any() ? currentPlayers.Average(f => f.Quality) : candidate.Quality;
                             double qualityFactor = candidate.Quality / (avgQuality + 0.01);
                             double ageFactor = candidate.Age <= 30 ? 1 : Math.Max(0.5, 1 - (candidate.Age - 30) * 0.05);
-                            double acceptanceProbability = Math.Min(1, qualityFactor * ageFactor);
+                            double potentialFactor = 1 + (candidate.Potential - candidate.Quality) / 100.0; // thưởng nhẹ cho cầu thủ còn nhiều dư địa phát triển
+                            double acceptanceProbability = Math.Min(1, qualityFactor * ageFactor * potentialFactor);
 
                             double roll = rng.NextDouble();
                             _logger.LogInformation("Xác suất nhận offer = {Prob}, roll = {Roll}", acceptanceProbability, roll);
@@ -405,8 +450,8 @@ namespace FootballManager.Business.Services
                                 }
                                 else
                                 {
-                                    var price = CalculateTransferPriceForBudget(candidate);
-                                    await _transferRepository.AddTransferOfferAsync(candidate.ClubId.Value, candidate.Id, club.Id, 2);
+                                    var price = Helpers.TransferCalculator.CalculateTransferPrice(candidate);
+                                    await _transferRepository.AddTransferOfferAsync(candidate.ClubId.Value, candidate.Id, club.Id, 2, price);
                                     boughtFromClubThisRound[candidate.ClubId.Value] =
                                         boughtFromClubThisRound.GetValueOrDefault(candidate.ClubId.Value, 0) + 1;
                                     clubBudget -= price;
@@ -426,7 +471,5 @@ namespace FootballManager.Business.Services
                 }
             }
         }
-
-        private static decimal CalculateTransferPriceForBudget(Footballer player) => player.ContractYears * player.Quality;
     }
 }

@@ -20,6 +20,9 @@ namespace FootballManager.Business.Services.Interfaces
         Task BotDecideTransfersAsync();
         Task BotDecideWhoToBuyOrRenewAsync();
 
+        // Bot tự niêm yết cầu thủ dư thừa (thừa so với target squad composition) lên thị trường chuyển nhượng
+        Task BotListSurplusPlayersAsync();
+
     }
 
 }

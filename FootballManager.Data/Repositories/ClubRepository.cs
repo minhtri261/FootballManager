@@ -17,5 +17,22 @@ namespace FootballManager.Data.Repositories
                 .Include(c => c.Footballers)
                 .ToListAsync();
         }
+
+        // Lấy tất cả Club cùng quốc gia kèm danh sách Footballers
+        public async Task<List<Club>> GetClubsByNationAsync(string nation)
+        {
+            return await _dbSet
+                .Where(c => c.Nation == nation)
+                .Include(c => c.Footballers)
+                .ToListAsync();
+        }
+
+        // Lấy 1 Club theo Id kèm danh sách Footballers
+        public async Task<Club?> GetByIdWithPlayersAsync(int id)
+        {
+            return await _dbSet
+                .Include(c => c.Footballers)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
     }
 }

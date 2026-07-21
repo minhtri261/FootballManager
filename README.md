@@ -1,29 +1,54 @@
-# Football Manager
+# ⚽ Football Manager
 
-Game quản lý bóng đá theo lượt (turn-based), viết bằng .NET 8. Người chơi điều hành 1 CLB, thời gian tiến theo tuần (`GameState`), mỗi tuần các trận đấu trong lịch (`ScheduleTemplate`) được tự động mô phỏng.
+Game quản lý bóng đá theo lượt (turn-based), viết bằng **.NET 8 / ASP.NET Core Web API + EF Core**. Người chơi điều hành 1 CLB xuyên suốt nhiều mùa giải; hệ thống tự mô phỏng toàn bộ phần còn lại — lịch thi đấu, kết quả trận đấu, đối thủ AI, thị trường chuyển nhượng, và vòng đời sự nghiệp cầu thủ qua từng mùa.
+
+Dự án được xây theo hướng **backend-driven simulation**: gần như toàn bộ logic nghiệp vụ (sinh lịch thi đấu đa thể thức, mô phỏng trận đấu có trọng số, kinh tế chuyển nhượng, AI đối thủ) nằm ở tầng service, expose ra ngoài qua REST API — tách bạch hoàn toàn khỏi bất kỳ client cụ thể nào.
+
+## Điểm nổi bật kỹ thuật
+
+- **State machine mùa giải nhiều thể thức**: cùng lúc vận hành League (vòng tròn 2 lượt), Cup (knockout ghép seed), và giải châu lục kiểu C1 (vòng bảng → bán kết → chung kết) trên chung 1 lịch tuần (`ScheduleTemplate`), tự sinh lịch động cho vòng knockout dựa theo kết quả vòng trước.
+- **Match simulator có trọng số thực tế**: sức mạnh tính từ đúng đội hình ra sân (không phải cả đội), cộng dồn lợi thế sân nhà, phong độ CLB, phân phối bàn thắng theo Poisson, chọn người ghi bàn ngẫu nhiên có trọng số theo vị trí, MVP trận đấu = cầu thủ ghi nhiều bàn nhất.
+- **Nền kinh tế chuyển nhượng**: định giá cầu thủ theo hàm phi tuyến (Quality, dư địa phát triển, độ tuổi, thời hạn hợp đồng), AI đối thủ tự đánh giá đội hình đang thiếu, tự niêm yết cầu thủ dư thừa, tự thương lượng và chốt giao dịch — toàn bộ chạy tự động theo vòng lặp game, không cần can thiệp thủ công.
+- **Vòng đời cầu thủ xuyên suốt nhiều mùa**: lão hoá theo tuổi, chuyển giai đoạn sự nghiệp (Youth → Rising → Peak → Stable → Veteran → giải nghệ), tăng/giảm chỉ số theo cơ chế đào tạo của từng CLB, tự đôn cầu thủ trẻ bù quân số mỗi mùa.
+- **Kiến trúc phân lớp rõ ràng**, sẵn sàng mở rộng thêm giải đấu/quốc gia mà không cần sửa logic lõi (chỉ cần thêm dữ liệu).
+
+## Các nhóm chức năng chính
+
+### Season & Fixtures
+Khởi tạo mùa giải, gán CLB vào giải theo quốc gia/thứ hạng mùa trước, tự sinh lịch thi đấu cho cả 3 thể thức, tổng kết mùa (vô địch, vua phá lưới, MVP, trao thưởng).
+> `POST /api/game/next-week`, `GET /api/tournament/{id}` (BXH hoặc bracket tuỳ thể thức)
+
+### Match Simulation
+Mô phỏng trận đấu dựa trên đội hình thực tế, ghi nhận bàn thắng/MVP từng trận, tự cập nhật bảng xếp hạng.
+> Chạy ngầm trong `next-week`, kết quả xem qua `GET /api/tournament/{id}`, `GET /api/myclub/last-result`
+
+### Club & Player Management
+Xem đội hình, trận tiếp theo, đội hình đối thủ (scouting), nộp đội hình ra sân; cuối mỗi mùa cầu thủ lão hoá/tăng-giảm chỉ số/giải nghệ, đôn cầu thủ trẻ mới bù quân số (tên sinh ngẫu nhiên theo quốc gia).
+> `GET /api/myclub`, `GET /api/myclub/players`, `GET /api/myclub/next-match`, `GET /api/myclub/next-opponent-lineup`, `POST /api/myclub/lineup`
+
+### Transfer Market
+Thị trường chuyển nhượng cho cả người chơi lẫn AI: chiêu mộ cầu thủ tự do, gia hạn hợp đồng, gửi/nhận đề nghị chuyển nhượng, định giá tự động, AI tự niêm yết cầu thủ dư thừa và tự quyết định mua/bán mỗi đầu mùa.
+> `GET /api/transfer/market`, `POST /api/transfer/free-agent-offer`, `POST /api/transfer/renew-contract`, `POST /api/transfer/transfer-offer`
 
 ## Kiến trúc
 
-Solution gồm 4 project, chia theo layer:
-
 ```
 FootballManager.Data          Entities, EF Core DbContext, Migrations, Repositories
-FootballManager.Business      Services (nghiệp vụ), DTOs, DependencyInjection
-FootballManagerAPI            ASP.NET Core Web API (FootballManagerAPI.sln)
-FootballManagerMVC            ASP.NET Core MVC, gọi API qua ApiClient (HttpClient)
+FootballManager.Business      Services (nghiệp vụ), DTOs, Helpers, DependencyInjection
+FootballManagerAPI            ASP.NET Core Web API — cổng vào duy nhất tới nghiệp vụ
+FootballManagerMVC            ASP.NET Core MVC (Dashboard), gọi API qua HttpClient
 ```
 
-Luồng phụ thuộc: `API/MVC → Business → Data`. `MVC` không truy cập DB trực tiếp, chỉ gọi `API` qua HTTP.
+Luồng phụ thuộc: `API/MVC → Business → Data` (1 chiều, `Data` không biết gì về `Business`). `MVC` không truy cập DB trực tiếp — mọi thao tác đều qua `API`.
 
-### Repository pattern
+**Pattern đã áp dụng:**
+- **Repository + Unit of Work**: mọi repository kế thừa `BaseRepository<T> : IBaseRepository<T>`; ghi dữ liệu qua `IUnitOfWork.SaveChangesAsync()` ở tầng Service cho luồng đơn giản, hoặc repository tự gói gọn nhiều bước ghi trong 1 lần lưu khi nghiệp vụ phức tạp (vd `MatchRepository.SimulateMatchAsync`).
+- **Code-first migrations** với EF Core — toàn bộ thay đổi schema (15+ migration) đều có lịch sử, review được.
+- **DTO tách biệt Entity** ở phần lớn API response (danh sách cầu thủ, BXH/bracket, kết quả trận...).
 
-Tất cả repository đều kế thừa `BaseRepository<T> : IBaseRepository<T>`. Thao tác ghi (`AddAsync`/`Update`/`Delete`) chỉ đánh dấu thay đổi trên `DbContext`; việc lưu được thực hiện qua `IUnitOfWork.SaveChangesAsync()` ở tầng Service (cho các luồng đơn giản), hoặc repository tự gọi `SaveChangesAsync()` khi thao tác phức tạp/nhiều bước cần gói gọn trong 1 lần lưu (`MatchRepository.SimulateMatchAsync`, `TransferRepository`).
+## Công nghệ sử dụng
 
-### Luồng chính
-
-- `POST api/game/next-week` (`GameStateService.AdvanceNextWeekAsync`): mô phỏng các trận trong vòng đấu hiện tại, thiết lập đội hình BOT ở tuần 3 (`BotService`), tổng kết mùa giải + chia thưởng khi tới tuần cuối, tiến sang tuần/mùa kế tiếp.
-- `GET api/dashboard`: tổng hợp trạng thái game, CLB của người chơi, bảng xếp hạng, trận kế tiếp, kết quả gần nhất.
-- `api/transfer/*`: thị trường chuyển nhượng — chiêu mộ cầu thủ tự do, gia hạn hợp đồng, gửi đề nghị chuyển nhượng, BOT tự quyết định mua/bán.
+.NET 8 · ASP.NET Core Web API · Entity Framework Core 8 (SQL Server) · ASP.NET Core MVC
 
 ## Chạy dự án
 
@@ -37,8 +62,20 @@ cd FootballManagerMVC
 dotnet run
 ```
 
-Migrate database (sau khi review migration):
+Migrate database (nên review migration trước khi update):
 
 ```bash
 dotnet ef database update --project FootballManager.Data --startup-project FootballManagerAPI
 ```
+
+## Định hướng mở rộng
+
+Những phần chưa làm, có thể phát triển tiếp:
+
+- Giao diện MVC/FE đầy đủ cho các API đã có (hiện chỉ Dashboard có UI)
+- Cho phép người chơi tự niêm yết cầu thủ của mình lên thị trường (hiện chỉ AI tự niêm yết)
+- Chấn thương, thẻ phạt, thể lực — các yếu tố ảnh hưởng khả năng ra sân
+- Authentication/phân quyền, hỗ trợ nhiều người chơi/nhiều CLB trên cùng 1 hệ thống
+- Chiến thuật chi tiết hơn (pressing, tempo...) thay vì chỉ chọn sơ đồ đội hình
+- API xem lại lịch sử nhiều mùa (dữ liệu `SeasonSummary` đã có, chưa có endpoint liệt kê)
+- Bộ automated test (unit/integration) — hiện toàn bộ được verify thủ công qua HTTP + truy vấn DB trực tiếp

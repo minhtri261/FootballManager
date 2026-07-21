@@ -97,6 +97,7 @@ namespace FootballManager.Business.Services
                 var bestInPosition = allPlayers
                     .Where(p => allowedPositions.Contains(p.Position) && !selectedIds.Contains(p.Id))
                     .OrderByDescending(p => p.Quality)
+                    .ThenBy(p => p.Id) // tie-break ổn định để đội hình BOT không đổi khác nhau giữa các lần tính
                     .Take(requiredCount)
                     .ToList();
 
@@ -114,6 +115,7 @@ namespace FootballManager.Business.Services
                 var backups = allPlayers
                     .Where(p => !selectedIds.Contains(p.Id))
                     .OrderByDescending(p => p.Quality)
+                    .ThenBy(p => p.Id)
                     .Take(7 - finalLineup.Count)
                     .ToList();
 

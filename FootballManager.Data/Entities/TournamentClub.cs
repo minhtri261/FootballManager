@@ -15,7 +15,8 @@
         public int Lost { get; set; } = 0;
 
         public int Points { get; set; }
-        public int Rank { get; set; }
+        public int Rank { get; set; }        // Seed ban đầu (1 = mạnh nhất) dùng để ghép cặp knockout
+        public int? Group { get; set; }       // Bảng đấu (vd 1/2) cho giải có vòng bảng như C1
         public int GoalsFor { get; set; }
         public int GoalsAgainst { get; set; }
     }

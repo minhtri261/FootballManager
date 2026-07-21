@@ -16,6 +16,9 @@ namespace FootballManager.Data.Entities
         public TournamentType Type { get; set; }
         public int PlayersPerMatch { get; set; } = 7;
 
+        // Null = giải quốc tế/châu lục (vd AFC Champions League). Có giá trị = giải quốc nội, khớp với Club.Nation
+        public string? Nation { get; set; }
+
 
         // RewardByRank stored as JSON string (e.g. [{"rank":1,"money":2000},{"rank":2,"money":1500}])
         public string? RewardByRank { get; set; }
